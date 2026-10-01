@@ -57,12 +57,12 @@ function App() {
         <button
           onClick={() => setShow((currentShow) => !currentShow)}
           style={{
-            width: "160px",
+            width: "140px",
             fontStyle: "bold",
             backgroundColor: "yellow",
           }}
         >
-          {show ? "Show Easy" : "Show Harder"} Grids
+          Show {show ? "Paid" : "Free"} Grids
         </button>
       </div>
 
@@ -156,7 +156,7 @@ function App() {
 {!show && (
   <>
     <h2 style={{ margin: "0 0 8px", fontSize: "22px" }}>
-      Hard Grid — Sales
+      Enterprise (paid)
     </h2>
 
     <div
