@@ -1,16 +1,26 @@
-import { useState } from "react";
-import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import { useRef, useState } from "react";
+// import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import type { GridApi } from "ag-grid-community";
+import { AllEnterpriseModule, ModuleRegistry } from "ag-grid-enterprise";
 import { AgGridReact } from "ag-grid-react";
-import { columnDefs, secondColumnDefs, type Car } from "./columnDefs";
-import { rowCarData } from "./rowData";
+import {
+  columnDefs,
+  secondColumnDefs,
+  salesColumnDefs,
+  type Car,
+  type Sales,
+} from "./columnDefs";
+import { rowCarData, rowSalesData } from "./rowData";
 
-// Register the Community features used by this example.
-ModuleRegistry.registerModules([AllCommunityModule]);
+// Easy grid features are available in Community (free); Hard grid features use Enterprise (paid).
+// ModuleRegistry.registerModules([AllCommunityModule]);
+ModuleRegistry.registerModules([AllEnterpriseModule]);
 
 function App() {
   const [quickFilterText, setQuickFilterText] = useState("");
   const [selectedMake, setSelectedMake] = useState("");
   const [show, setShow] = useState(true);
+  const salesGridApi = useRef<GridApi<Sales> | null>(null);
 
   return (
     <main
@@ -143,11 +153,116 @@ function App() {
         </>
       )}
 
-      {!show && (
-        <>
-          <h2 style={{ margin: "0 0 8px", fontSize: "22px" }}>Hard Grid</h2>
-        </>
-      )}
+{!show && (
+  <>
+    <h2 style={{ margin: "0 0 8px", fontSize: "22px" }}>
+      Hard Grid — Sales
+    </h2>
+
+    <div
+      style={{
+        display: "flex",
+        gap: "8px",
+        marginBottom: "8px",
+      }}
+    >
+      <button
+        onClick={() => {
+          salesGridApi.current?.applyTransaction({
+            add: [
+              {
+                id: Date.now(),
+                customer: "New Customer",
+                region: "Northeast",
+                product: "Laptop",
+                revenue: 150000,
+                status: "won",
+              },
+            ],
+          });
+        }}
+      >
+        Add Sale
+      </button>
+
+      <button
+        onClick={() => {
+          const selectedRows =
+            salesGridApi.current?.getSelectedRows();
+
+          if (selectedRows?.length) {
+            salesGridApi.current?.applyTransaction({
+              remove: selectedRows,
+            });
+          }
+        }}
+      >
+        Remove Selected
+      </button>
+
+      <button
+        onClick={() => {
+          salesGridApi.current?.exportDataAsCsv({
+            fileName: "sales-data.csv",
+          });
+        }}
+      >
+        Export CSV
+      </button>
+    </div>
+
+    <div
+      style={{
+        height: "600px",
+        width: "100%",
+      }}
+    >
+      <AgGridReact<Sales>
+        ref={(grid) => {
+          salesGridApi.current = grid?.api ?? null;
+        }}
+        rowData={rowSalesData}
+        columnDefs={salesColumnDefs}
+        getRowId={(params) => String(params.data.id)}
+        defaultColDef={{
+          flex: 1,
+          minWidth: 130,
+          sortable: true,
+          resizable: true,
+          filter: true,
+          floatingFilter: true,
+        }}
+        rowSelection={{
+          mode: "multiRow",
+          checkboxes: true,
+          headerCheckbox: true,
+          enableClickSelection: true,
+        }}
+        sideBar="columns"
+        pivotMode={false}
+        groupDefaultExpanded={1}
+        grandTotalRow="bottom"
+        statusBar={{
+          statusPanels: [
+            {
+              statusPanel: "agTotalAndFilteredRowCountComponent",
+              align: "left",
+            },
+            {
+              statusPanel: "agSelectedRowCountComponent",
+              align: "center",
+            },
+            {
+              statusPanel: "agAggregationComponent",
+              align: "right",
+            },
+          ],
+        }}
+      />
+    </div>
+  </>
+)}
+      
     </main>
   );
 }
