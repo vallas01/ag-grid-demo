@@ -1,7 +1,13 @@
 import { useRef, useState } from "react";
-// import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import {
+  AllCommunityModule,
+  ModuleRegistry as CommunityModuleRegistry,
+} from "ag-grid-community";
 import type { GridApi } from "ag-grid-community";
-import { AllEnterpriseModule, ModuleRegistry } from "ag-grid-enterprise";
+import {
+  AllEnterpriseModule,
+  ModuleRegistry as EnterpriseModuleRegistry,
+} from "ag-grid-enterprise";
 import { AgGridReact } from "ag-grid-react";
 import {
   columnDefs,
@@ -13,14 +19,25 @@ import {
 import { rowCarData, rowSalesData } from "./rowData";
 
 // Easy grid features are available in Community (free); Hard grid features use Enterprise (paid).
-// ModuleRegistry.registerModules([AllCommunityModule]);
-ModuleRegistry.registerModules([AllEnterpriseModule]);
+CommunityModuleRegistry.registerModules([AllCommunityModule]);
 
 function App() {
   const [quickFilterText, setQuickFilterText] = useState("");
   const [selectedMake, setSelectedMake] = useState("");
   const [show, setShow] = useState(true);
   const salesGridApi = useRef<GridApi<Sales> | null>(null);
+
+  function toggleGridExamples() {
+    const showFreeGrids = !show;
+
+    if (showFreeGrids) {
+      CommunityModuleRegistry.registerModules([AllCommunityModule]);
+    } else {
+      EnterpriseModuleRegistry.registerModules([AllEnterpriseModule]);
+    }
+
+    setShow(showFreeGrids);
+  }
 
   return (
     <main
@@ -55,7 +72,7 @@ function App() {
           AG Grid Examples
         </h1>
         <button
-          onClick={() => setShow((currentShow) => !currentShow)}
+          onClick={toggleGridExamples}
           style={{
             width: "140px",
             fontStyle: "bold",
